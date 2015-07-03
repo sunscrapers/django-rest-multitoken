@@ -14,7 +14,7 @@ Developed by [SUNSCRAPERS](http://sunscrapers.com/) with passion & patience.
 Use pip:
 
 ```
-pip install git+https://github.com/sunscrapers/djoser.git
+pip install git+https://github.com/sunscrapers/django-rest-multitoken.git
 ```
 
 ## Usage
