@@ -5,8 +5,90 @@
 
 Implementation of [Django Rest Framework token authentication](http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication) that maintains multiple tokens for each user.
 
-Currently the project is under heavy development. It was extracted from [djoser](https://github.com/sunscrapers/djoser) library. Working version is [available here](https://github.com/sunscrapers/djoser/tree/custom-auth-token).
+Currently the project is still under development. It was extracted from [djoser](https://github.com/sunscrapers/djoser) library. Original draft version is [available here](https://github.com/sunscrapers/djoser/tree/custom-auth-token).
 
+Developed by [SUNSCRAPERS](http://sunscrapers.com/) with passion & patience.
+
+## Installation
+
+Use pip:
+
+```
+pip install git+https://github.com/sunscrapers/djoser.git
+```
+
+## Usage
+
+Add `multitoken` app to `INSTALLED_APPS`:
+
+```
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    (...),
+    'rest_framework',
+    'multitoken',
+    (...),
+)
+```
+
+Configure `urls.py`:
+
+```
+urlpatterns = patterns('',
+    (...),
+    url(r'^auth/', include('multitoken.urls')),
+)
+```
+
+Set up Django Rest Framework authentication strategy to `multitoken.authentication.TokenAuthentication`:
+
+```
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'multitoken.authentication.TokenAuthentication',
+    ),
+}
+```
+
+## Endpoints
+
+### Login
+
+Use this endpoint to obtain user authentication token.
+
+#### `POST`
+
+URL: `/login/`
+
+* **request**
+
+    * data:
+
+        `{{ User.USERNAME_FIELD }}`
+
+        `password`
+        
+        `client`
+
+* **response**
+
+    * status: `HTTP_200_OK` (success)
+
+    * data:
+
+        `auth_token`
+
+### Logout
+
+Use this endpoint to logout user and remove user authentication token.
+
+#### `POST`
+
+URL: `/logout/`
+
+* **response**
+
+    * status: `HTTP_200_OK` (success)
 
 ## Development
 
