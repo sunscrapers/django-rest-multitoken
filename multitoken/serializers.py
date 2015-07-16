@@ -15,7 +15,7 @@ class TokenSerializer(serializers.ModelSerializer):
         )
 
 
-class LoginSerializer(serializers.Serializer):
+class ObtainTokenSerializer(serializers.Serializer):
     password = serializers.CharField(required=False)
     client = serializers.CharField()
 
@@ -25,7 +25,7 @@ class LoginSerializer(serializers.Serializer):
     }
 
     def __init__(self, *args, **kwargs):
-        super(LoginSerializer, self).__init__(*args, **kwargs)
+        super(ObtainTokenSerializer, self).__init__(*args, **kwargs)
         self.user = None
         self.fields[User.USERNAME_FIELD] = serializers.CharField(required=False)
 

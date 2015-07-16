@@ -2,14 +2,15 @@ from rest_framework import permissions, generics, response, status
 from . import serializers, utils
 
 
-class LoginView(generics.GenericAPIView):
+class ObtainTokenView(generics.GenericAPIView):
     """
     Use this endpoint to obtain user authentication token.
     """
     permission_classes = (
         permissions.AllowAny,
     )
-    serializer_class = serializers.LoginSerializer
+    serializer_class = serializers.ObtainTokenSerializer
+    token_serializer_class = serializers.TokenSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.DATA)
@@ -24,12 +25,12 @@ class LoginView(generics.GenericAPIView):
     def login(self, serializer):
         token = utils.get_or_create_token(user=serializer.user, serializer_data=serializer.data)
         return response.Response(
-            data=serializers.TokenSerializer(token).data,
+            data=self.token_serializer_class(token).data,
             status=status.HTTP_200_OK,
         )
 
 
-class LogoutView(generics.GenericAPIView):
+class InvalidateTokenView(generics.GenericAPIView):
     """
     Use this endpoint to logout user (remove user authentication token).
     """

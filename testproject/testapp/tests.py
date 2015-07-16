@@ -19,7 +19,7 @@ def create_user(**kwargs):
 class LoginViewTest(restframework.APIViewTestCase,
                     assertions.StatusCodeAssertionsMixin,
                     assertions.InstanceAssertionsMixin):
-    view_class = views.LoginView
+    view_class = views.ObtainTokenView
 
     def test_post_should_login_user(self):
         user = create_user()
@@ -72,7 +72,7 @@ class LoginViewTest(restframework.APIViewTestCase,
 
 class LogoutViewTest(restframework.APIViewTestCase,
                      assertions.StatusCodeAssertionsMixin):
-    view_class = views.LogoutView
+    view_class = views.InvalidateTokenView
 
     def test_post_should_logout_logged_in_user(self):
         user = create_user()
