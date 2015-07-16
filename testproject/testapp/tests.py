@@ -37,6 +37,38 @@ class LoginViewTest(restframework.APIViewTestCase,
         self.assertEqual(response.data['auth_token'], token.key)
         self.assertEqual(data['client'], token.client)
 
+    def test_post_should_not_login_inactive_user(self):
+        user = create_user()
+        data = {
+            'username': user.username,
+            'password': user.raw_password,
+            'client': 'my-device',
+        }
+        user.is_active = False
+        user.save()
+        request = self.factory.post(data=data)
+
+        response = self.view(request)
+
+        self.assert_status_equal(response, status.HTTP_400_BAD_REQUEST)
+        with self.assertRaises(models.Token.DoesNotExist):
+            user.auth_tokens.get()
+
+    def test_post_should_not_login_when_wrong_credentials(self):
+        user = create_user()
+        data = {
+            'username': 'wrong username',
+            'password': 'wrong password',
+            'client': 'my-device',
+        }
+        request = self.factory.post(data=data)
+
+        response = self.view(request)
+
+        self.assert_status_equal(response, status.HTTP_400_BAD_REQUEST)
+        with self.assertRaises(models.Token.DoesNotExist):
+            user.auth_tokens.get()
+
 
 class LogoutViewTest(restframework.APIViewTestCase,
                      assertions.StatusCodeAssertionsMixin):
