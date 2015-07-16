@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.signals import user_logged_in
 from djet import assertions, restframework, utils
 from rest_framework import status
 from multitoken import models, views
@@ -21,6 +22,12 @@ class LoginViewTest(restframework.APIViewTestCase,
                     assertions.InstanceAssertionsMixin):
     view_class = views.ObtainTokenView
 
+    def setUp(self):
+        self.signal_sent = False
+
+    def signal_receiver(self, *args, **kwargs):
+        self.signal_sent = True
+
     def test_post_should_login_user(self):
         user = create_user()
         data = {
@@ -28,6 +35,7 @@ class LoginViewTest(restframework.APIViewTestCase,
             'password': user.raw_password,
             'client': 'my-device',
         }
+        user_logged_in.connect(self.signal_receiver)
         request = self.factory.post(data=data)
 
         response = self.view(request)
@@ -36,6 +44,7 @@ class LoginViewTest(restframework.APIViewTestCase,
         token = user.auth_tokens.get()
         self.assertEqual(response.data['auth_token'], token.key)
         self.assertEqual(data['client'], token.client)
+        self.assertTrue(self.signal_sent)
 
     def test_post_should_not_login_inactive_user(self):
         user = create_user()
@@ -46,6 +55,7 @@ class LoginViewTest(restframework.APIViewTestCase,
         }
         user.is_active = False
         user.save()
+        user_logged_in.connect(self.signal_receiver)
         request = self.factory.post(data=data)
 
         response = self.view(request)
@@ -53,6 +63,7 @@ class LoginViewTest(restframework.APIViewTestCase,
         self.assert_status_equal(response, status.HTTP_400_BAD_REQUEST)
         with self.assertRaises(models.Token.DoesNotExist):
             user.auth_tokens.get()
+        self.assertFalse(self.signal_sent)
 
     def test_post_should_not_login_when_wrong_credentials(self):
         user = create_user()
@@ -61,6 +72,7 @@ class LoginViewTest(restframework.APIViewTestCase,
             'password': 'wrong password',
             'client': 'my-device',
         }
+        user_logged_in.connect(self.signal_receiver)
         request = self.factory.post(data=data)
 
         response = self.view(request)
@@ -68,6 +80,7 @@ class LoginViewTest(restframework.APIViewTestCase,
         self.assert_status_equal(response, status.HTTP_400_BAD_REQUEST)
         with self.assertRaises(models.Token.DoesNotExist):
             user.auth_tokens.get()
+        self.assertFalse(self.signal_sent)
 
 
 class LogoutViewTest(restframework.APIViewTestCase,

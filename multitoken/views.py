@@ -1,3 +1,4 @@
+from django.contrib.auth.signals import user_logged_in
 from rest_framework import permissions, generics, response, status
 from . import serializers, utils
 
@@ -24,6 +25,7 @@ class ObtainTokenView(generics.GenericAPIView):
 
     def login(self, serializer):
         token = utils.get_or_create_token(user=serializer.user, serializer_data=serializer.data)
+        user_logged_in.send(sender=serializer.user.__class__, request=self.request, user=serializer.user)
         return response.Response(
             data=self.token_serializer_class(token).data,
             status=status.HTTP_200_OK,
